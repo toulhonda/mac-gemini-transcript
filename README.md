@@ -46,11 +46,21 @@
 
 ## 使用方法
 
-仮想環境をアクティベートした状態で、以下のコマンドを実行します。
+仮想環境をアクティベートした状態で、以下のいずれかの方法でスクリプトを実行します。
 
-```bash
-python mac-gemini-transcript.py
-```
+1.  **直接実行 (推奨、特にシンボリックリンク後)**:
+    ```bash
+    ./mac-gemini-transcript.py
+    ```
+    または、`/usr/local/bin` にシンボリックリンクを作成した場合:
+    ```bash
+    mac-gemini-transcript
+    ```
+
+2.  **Pythonインタープリターを指定して実行**:
+    ```bash
+    python mac-gemini-transcript.py
+    ```
 
 プログラムが起動すると、スプラッシュ画面が表示され、その後、対話形式で以下の情報が求められます。
 

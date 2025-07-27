@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 
 print("""
 ███╗   ███╗ █████╗  ██████╗        ██████╗ ███████╗███╗   ███╗██╗███╗   ██╗██╗
@@ -25,11 +26,14 @@ import pathlib
 import re # 正規表現を使うために必要です
 import json # JSONファイルを読み込むために必要です
 
+# スクリプトの実行ディレクトリを取得 (シンボリックリンクの場合も考慮)
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+
 # APIキーをJSONファイルから読み込む
-CONFIG_FILE = 'config.json'
+CONFIG_FILE = os.path.join(SCRIPT_DIR, 'config.json')
 
 # Configuration file for interactive inputs
-INTERACTIVE_CONFIG_FILE = 'interactive_config.json'
+INTERACTIVE_CONFIG_FILE = os.path.join(SCRIPT_DIR, 'interactive_config.json')
 
 def load_interactive_config():
     if os.path.exists(INTERACTIVE_CONFIG_FILE):
