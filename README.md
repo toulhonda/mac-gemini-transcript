@@ -7,7 +7,7 @@
 ## 機能
 
 *   **Gemini AIによる高度なテキスト変換**: Google Gemini APIを利用して、トランスクリプトを自然な書き言葉に変換します。
-*   **チャンク処理**: 大量のテキストをGemini APIの制限に合わせて自動的にチャンクに分割し、処理します（2000〜4000文字）。
+*   **チャンク処理**: 大量のテキストをGemini APIの制限に合わせて自動的にチャンクに分割し、処理します（3000〜4000文字）。
 *   **タイムスタンプの自動削除**: トランスクリプト内の `(00:00)` 形式のタイムスタンプを自動的に削除します。
 *   **対話式設定**: 実行時に動画のテーマ、話者の属性、動画の目的、出力のトーンなどを対話形式で入力できます。
 *   **設定の保存と再利用**: 入力された設定は一時ファイルに保存され、次回実行時にデフォルト値として再利用できます。
@@ -18,10 +18,9 @@
 
 1.  **リポジトリのクローン**:
     ```bash
-    git clone https://github.com/your-username/mac-gemini-transcript.git
+    git clone https://github.com/toulhonda/mac-gemini-transcript.git
     cd mac-gemini-transcript
     ```
-    (注: `your-username` はあなたのGitHubユーザー名に置き換えてください)
 
 2.  **Python仮想環境のセットアップ**:
     ```bash
@@ -39,7 +38,7 @@
     ```json
     {
         "GEMINI_API_KEY": "YOUR_GEMINI_API_KEY",
-        "GEMINI_MODEL": "gemini-1.5-flash" # または "gemini-1.5-pro" など
+        "GEMINI_MODEL": "gemini-1.5-flash" # または "gemini-2.5-flash" など
     }
     ```
     *   `YOUR_GEMINI_API_KEY` の部分を、[Google AI Studio](https://aistudio.google.com/app/apikey) で取得した実際のAPIキーに置き換えてください。

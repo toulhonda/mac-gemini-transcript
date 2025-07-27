@@ -15,7 +15,7 @@ print("""
    ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝ ╚═════╝╚═╝  ╚═╝╚═╝╚═╝        ╚═╝   
 
                  macOS Gemini AI Transcription Tool 
-                          Version 2025.07.26
+                          Version 2025.07.27
 """)
 
 
@@ -161,7 +161,7 @@ if __name__ == "__main__":
             # タイムスタンプを削除 (例: (00:18))
             full_text = re.sub(r'\(\d{2}:\d{2}\)', '', full_text)
 
-        min_chunk_size = 2500
+        min_chunk_size = 3000
         max_chunk_size = 3500
         current_pos = 0
         chunk_num = 0
