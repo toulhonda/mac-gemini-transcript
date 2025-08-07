@@ -38,8 +38,22 @@ INTERACTIVE_CONFIG_FILE = os.path.join(SCRIPT_DIR, 'interactive_config.json')
 def load_interactive_config():
     if os.path.exists(INTERACTIVE_CONFIG_FILE):
         with open(INTERACTIVE_CONFIG_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    return {}
+            try:
+                config = json.load(f)
+                # 旧バージョンからの移行処理
+                if 'history' not in config:
+                    return {
+                        "history": [
+                            {
+                                "title": "（旧設定）",
+                                "content": config
+                            }
+                        ]
+                    }
+                return config
+            except json.JSONDecodeError:
+                return {"history": []}
+    return {"history": []}
 
 def save_interactive_config(config):
     with open(INTERACTIVE_CONFIG_FILE, 'w', encoding='utf-8') as f:
@@ -51,20 +65,22 @@ try:
     api_key = config.get('GEMINI_API_KEY')
     model_name = config.get('GEMINI_MODEL', 'gemini-1.5-flash') # デフォルトモデルを設定
     if not api_key:
-        raise ValueError(f"'{CONFIG_FILE}'に'GEMINI_API_KEY'が設定されていません。")
+        raise ValueError(f'{CONFIG_FILE}に{GEMINI_API_KEY}が設定されていません。')
     genai.configure(api_key=api_key)
-    print(f"APIキーを'{CONFIG_FILE}'から正常に読み込みました。")
-    print(f"使用するGeminiモデル: {model_name}")
+    print(f'APIキーを{CONFIG_FILE}から正常に読み込みました。')
+    print(f'使用するGeminiモデル: {model_name}')
 except FileNotFoundError:
-    print(f"エラー: 設定ファイル'{CONFIG_FILE}'が見つかりません。")
-    print(f"'{CONFIG_FILE}'を作成し、以下のようにAPIキーを設定してください:")
-    print("{\n    \"GEMINI_API_KEY\": \"YOUR_GEMINI_API_KEY\"\n}")
+    print(f'エラー: 設定ファイル{CONFIG_FILE}が見つかりません。')
+    print(f'{CONFIG_FILE}を作成し、以下のようにAPIキーを設定してください:')
+    print("""{
+    "GEMINI_API_KEY": "YOUR_GEMINI_API_KEY"
+}""")
     exit(1)
 except json.JSONDecodeError:
-    print(f"エラー: '{CONFIG_FILE}'のJSON形式が不正です。")
+    print(f'エラー: {CONFIG_FILE}のJSON形式が不正です。')
     exit(1)
 except ValueError as e:
-    print(f"エラー: {e}")
+    print(f'エラー: {e}')
     exit(1)
 
 def correct_and_convert_chunk(text_chunk, theme, speaker_attribute, purpose, tone, model_name):
@@ -105,7 +121,8 @@ def correct_and_convert_chunk(text_chunk, theme, speaker_attribute, purpose, ton
 
 if __name__ == "__main__":
     interactive_config = load_interactive_config()
-
+    history = interactive_config.get("history", [])
+    
     # 1. 対象ファイルのパスを指定してください
     input_file_path = input("1. 対象ファイルのパスを指定してください: ").strip().strip("'")
     if input_file_path.lower() == 'q':
@@ -116,43 +133,87 @@ if __name__ == "__main__":
         if input_file_path.lower() == 'q':
             exit(0)
 
+    # 設定の選択または新規作成
+    print("\n--- 設定を選択してください ---")
+    for i, item in enumerate(history):
+        print(f"{i + 1}: {item['title']}")
+    print("n: 新しい設定を作成")
+    print("q: 終了")
+
+    choice = input("選択: ").strip().lower()
+
+    if choice == 'q':
+        exit(0)
+
+    selected_config = {}
+    if choice.isdigit() and 1 <= int(choice) <= len(history):
+        selected_config = history[int(choice) - 1]['content']
+    elif choice != 'n':
+        print("無効な選択です。新しい設定を作成します。")
+
     # 2. 動画のテーマを入力してください
-    default_theme = interactive_config.get('theme', '')
+    default_theme = selected_config.get('theme', '')
     theme = input(f"2. 動画のテーマを入力してください (現在: {default_theme}): ").strip()
     if theme.lower() == 'q':
         exit(0)
     if not theme:
         theme = default_theme
-    interactive_config['theme'] = theme
 
     # 3. 話者の属性・専門家を入力してください
-    default_speaker_attribute = interactive_config.get('speaker_attribute', '')
+    default_speaker_attribute = selected_config.get('speaker_attribute', '')
     speaker_attribute = input(f"3. 話者の属性・専門家を入力してください (現在: {default_speaker_attribute}): ").strip()
     if speaker_attribute.lower() == 'q':
         exit(0)
     if not speaker_attribute:
         speaker_attribute = default_speaker_attribute
-    interactive_config['speaker_attribute'] = speaker_attribute
 
     # 4. 動画の目的を入力してください
-    default_purpose = interactive_config.get('purpose', '')
+    default_purpose = selected_config.get('purpose', '')
     purpose = input(f"4. 動画の目的を入力してください (現在: {default_purpose}): ").strip()
     if purpose.lower() == 'q':
         exit(0)
     if not purpose:
         purpose = default_purpose
-    interactive_config['purpose'] = purpose
 
     # 5. 出力のトーンを入力してください
-    default_tone = interactive_config.get('tone', '')
+    default_tone = selected_config.get('tone', '')
     tone = input(f"5. 出力のトーンを入力してください (現在: {default_tone}): ").strip()
     if tone.lower() == 'q':
         exit(0)
     if not tone:
         tone = default_tone
-    interactive_config['tone'] = tone
 
-    save_interactive_config(interactive_config)
+    # 新しい設定を履歴に保存
+    new_content = {
+        "theme": theme,
+        "speaker_attribute": speaker_attribute,
+        "purpose": purpose,
+        "tone": tone
+    }
+
+    # 既存の履歴と同じ内容の場合は保存しない
+    is_duplicate = False
+    for item in history:
+        if item['content'] == new_content:
+            is_duplicate = True
+            break
+
+    if not is_duplicate:
+        title = input("この設定のタイトルを入力してください: ").strip()
+        if title.lower() == 'q':
+            exit(0)
+        if not title:
+            title = f"設定 {len(history) + 1}"
+        
+        new_entry = {
+            "title": title,
+            "content": new_content
+        }
+        history.insert(0, new_entry)
+        # 履歴を5件に制限
+        interactive_config["history"] = history[:5]
+        save_interactive_config(interactive_config)
+
 
     # 出力ファイル名の生成
     input_path_obj = pathlib.Path(input_file_path)
