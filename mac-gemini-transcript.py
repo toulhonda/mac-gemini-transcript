@@ -16,7 +16,7 @@ print("""
    ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝ ╚═════╝╚═╝  ╚═╝╚═╝╚═╝        ╚═╝   
 
                  macOS Gemini AI Transcription Tool 
-                          Version 2025.07.27
+                          Version 2025.08.07
 """)
 
 
@@ -162,8 +162,9 @@ if __name__ == "__main__":
     try:
         with open(input_file_path, 'r', encoding='utf-8') as f_in:
             full_text = f_in.read()
-            # タイムスタンプを削除 (例: (00:18))
+            # タイムスタンプを削除 (例: (00:18) や 0:00:05.279,0:00:08.279)
             full_text = re.sub(r'\(\d{2}:\d{2}\)', '', full_text)
+            full_text = re.sub(r'^\d{1,2}:\d{2}:\d{2}\.\d{3},\d{1,2}:\d{2}:\d{2}\.\d{3}.*(\r\n|\n|\r)', '', full_text, flags=re.MULTILINE)
 
         min_chunk_size = 3000
         max_chunk_size = 3500
